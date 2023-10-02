@@ -1,5 +1,7 @@
 package cs3500.klondike.view;
 
+import java.io.IOException;
+
 import cs3500.klondike.model.hw02.Card;
 import cs3500.klondike.model.hw02.KlondikeModel;
 
@@ -70,5 +72,10 @@ public class KlondikeTextualView implements TextView {
     }
 
     return sb.toString().trim();
+  }
+
+  @Override
+  public void render() throws IOException {
+
   }
 }
