@@ -1,7 +1,5 @@
 package cs3500.klondike.view;
 
-import java.io.IOException;
-
 import cs3500.klondike.model.hw02.Card;
 import cs3500.klondike.model.hw02.KlondikeModel;
 
@@ -25,7 +23,6 @@ public class KlondikeTextualView implements TextView {
 
     // Draw Cards
     sb.append("Draw:");
-    // Assuming that model provides a getDrawCards() method
     for (Card card : model.getDrawCards()) {
       sb.append(" ").append(card);
     }
@@ -33,15 +30,16 @@ public class KlondikeTextualView implements TextView {
 
     // Foundation Piles
     sb.append("Foundation:");
-    // Using the getCardAt method for foundation piles now
-    // foundation piles is equals the numbers of Aces, calling the getNumFoundations()
-    //after the gameStart should return us the correct number of foundation
     for (int i = 0; i < model.getNumFoundations(); i++) {
-      Card card = model.getCardAt(i, 0); // foundation piles only have one card at a time
-      if (card == null) {
+      try {
+        Card card = model.getCardAt(i, 0);  // Try to get the top card
+        if (card != null) {
+          sb.append(" ").append(card);
+        } else {
+          sb.append(" <none>");
+        }
+      } catch (IllegalArgumentException e) {
         sb.append(" <none>");
-      } else {
-        sb.append(" ").append(card);
       }
     }
     sb.append("\n");
@@ -52,30 +50,23 @@ public class KlondikeTextualView implements TextView {
 
     for (int row = 0; row < maxPileHeight; row++) {
       for (int pileNum = 0; pileNum < numPiles; pileNum++) {
-        // Before getting the card, check if the index is valid
-        if (row < model.getPileHeight(pileNum)) {
-          Card card = model.getCardAt(pileNum, row);
+        if (model.getPileHeight(pileNum) > 0) {
+          Card card = model.getCardAt(pileNum, model.getPileHeight(pileNum) - 1); // Get the top card
           if (card == null) {
             sb.append("  ?");
-          } else {
+          } else if (card.isVisible()) {
             sb.append(String.format("%3s", card));
+          } else {
+            sb.append("  ?");
           }
         } else {
-          if (row == 0 && model.getPileHeight(pileNum) == 0) {
-            sb.append("  X");
-          } else {
-            sb.append("   ");
-          }
+          sb.append("  X");
         }
       }
       sb.append("\n");
     }
 
-    return sb.toString().trim();
+    return sb.toString();
   }
 
-  @Override
-  public void render() throws IOException {
-
-  }
 }
