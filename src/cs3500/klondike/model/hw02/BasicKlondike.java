@@ -245,13 +245,23 @@ public class BasicKlondike implements KlondikeModel {
 
     // Handling the cascade piles
     int cardIndex = 0;
+    int rows = deck.size() / numPiles;
 
-    for (int pileNumber = 0; pileNumber < numPiles; pileNumber++) {
-      // each pile should contain "pileNumber + 1" cards
-      for (int j = 0; j < pileNumber + 1 && cardIndex < deck.size(); j++) {
-        KlondikeCard card = (KlondikeCard) deck.get(cardIndex++);
-        card.setVisible(j == pileNumber); // Set only the top card of each pile to be visible
-        cascade.get(pileNumber).add(card);
+    for (int row = 0; row <= rows; row++) {
+      for (int pileNumber = 0; pileNumber < numPiles; pileNumber++) {
+        if (row <= pileNumber) {  // Make sure we're not trying to deal to a pile that's supposed to have fewer cards
+          if (cardIndex >= deck.size()) {
+            break;
+          }
+          KlondikeCard card = (KlondikeCard) deck.get(cardIndex++);
+
+          if (row == pileNumber) {
+            card.setVisible(true); // Set only the card in the last row of each pile to be visible
+          } else {
+            card.setVisible(false);
+          }
+          cascade.get(pileNumber).add(card);
+        }
       }
     }
 
