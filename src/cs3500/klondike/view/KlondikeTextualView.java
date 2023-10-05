@@ -50,8 +50,8 @@ public class KlondikeTextualView implements TextView {
 
     for (int row = 0; row < maxPileHeight; row++) {
       for (int pileNum = 0; pileNum < numPiles; pileNum++) {
-        if (model.getPileHeight(pileNum) > 0) {
-          Card card = model.getCardAt(pileNum, model.getPileHeight(pileNum) - 1); // Get the top card
+        if (row < model.getPileHeight(pileNum)) {
+          Card card = model.getCardAt(pileNum, row);
           if (card == null) {
             sb.append("  ?");
           } else if (card.isVisible()) {
@@ -60,7 +60,7 @@ public class KlondikeTextualView implements TextView {
             sb.append("  ?");
           }
         } else {
-          sb.append("  X");
+          sb.append("   "); // Three spaces for alignment with the card's representation.
         }
       }
       sb.append("\n");
@@ -68,5 +68,8 @@ public class KlondikeTextualView implements TextView {
 
     return sb.toString();
   }
+
+
+
 
 }
