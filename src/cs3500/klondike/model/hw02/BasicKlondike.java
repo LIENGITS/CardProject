@@ -112,7 +112,7 @@ public class BasicKlondike implements KlondikeModel {
       // Sort cards within a suit by their rank values
       suitCards.sort(Comparator.comparingInt(Card::getRankValue));
 
-      // Check if the first card of this suit is an Ace
+      // Check if the first card of this suit is an Ace. this might be wrong
       if (!suitCards.get(0).getRank().equals("A")) {
         return false;
       }
@@ -159,8 +159,6 @@ public class BasicKlondike implements KlondikeModel {
     Collections.shuffle(shuffledDeck);
     return shuffledDeck;
   }
-
-
 
   /**
    * <p>Deal a new game of Klondike.
@@ -233,13 +231,11 @@ public class BasicKlondike implements KlondikeModel {
     this.numPiles = numPiles;
     this.numDraw = numDraw;
 
-    // Reset cascade and foundation piles
     cascade.clear();
     for (int i = 0; i < numPiles; i++) {
       cascade.add(new ArrayList<>());
     }
 
-    // Initialize foundations based on the number of Aces in the deck
     foundations.clear();
     int aceCount = (int) deck.stream().filter(card -> ((KlondikeCard) card).getRank().
             equals("A")).count();
@@ -247,38 +243,33 @@ public class BasicKlondike implements KlondikeModel {
       foundations.add(new ArrayList<>());
     }
 
-    // Deal deck into cascade piles
+    // Handling the cascade piles
     int cardIndex = 0;
+
     for (int pileNumber = 0; pileNumber < numPiles; pileNumber++) {
-      for (int cardNumberInPile = 0; cardNumberInPile <= pileNumber; cardNumberInPile++) {
-        if (cardIndex >= deck.size()) {
-          throw new IllegalArgumentException("Not enough cards to deal");
-        }
-        KlondikeCard card = (KlondikeCard) deck.get(cardIndex);
-        // set the visibility of the cards; only the top card of each cascade pile is visible
-        card.setVisible(cardNumberInPile == pileNumber);
+      // each pile should contain "pileNumber + 1" cards
+      for (int j = 0; j < pileNumber + 1 && cardIndex < deck.size(); j++) {
+        KlondikeCard card = (KlondikeCard) deck.get(cardIndex++);
+        card.setVisible(j == pileNumber); // Set only the top card of each pile to be visible
         cascade.get(pileNumber).add(card);
-        cardIndex++;
       }
     }
 
-    // Reset the drawPile and restOfDeck
     drawPile.clear();
     restOfDeck = new ArrayList<>();
 
-    // Deal the next 'numDraw' cards to drawPile
     for (int i = 0; i < Math.min(numDraw, deck.size() - cardIndex); i++) {
       KlondikeCard card = (KlondikeCard) deck.get(cardIndex++);
       card.setVisible(true);
       drawPile.add(card);
     }
 
-    // Deal the remaining cards to restOfDeck
     while (cardIndex < deck.size()) {
       KlondikeCard card = (KlondikeCard) deck.get(cardIndex++);
       card.setVisible(false);
       restOfDeck.add(card);
     }
+
     this.isGameStarted = true;
   }
 
@@ -317,10 +308,6 @@ public class BasicKlondike implements KlondikeModel {
 
     Card movingCard = sourceCards.get(sourceCards.size() - numCards);
 
-    // Prevent the movement of a card with rank "A" to another cascade pile.
-    if (movingCard.getRank().equals("A")) {
-      throw new IllegalStateException("Aces can only be moved to the foundation pile");
-    }
 
     Card topDestCard = destCards.isEmpty() ? null : destCards.get(destCards.size() - 1);
 
@@ -435,10 +422,6 @@ public class BasicKlondike implements KlondikeModel {
   // then the movingCard to an empty DestCard has to be a 5. If the deck is consist of
   // one set of each suit from Ace through King, then the movingCard needs to be K.
   private boolean isValidMoveToCascade(Card movingCard, Card topDestCard) {
-    // Prevent the movement of a card with rank "A" to another cascade pile.
-    if (movingCard.getRank().equals("A")) {
-      return false;
-    }
     // If there's no card in the destination pile, the movingCard has to be the highest value of
     // deck, for example if my deck is consist of one set of each suit from Ace through Five,
     // then the movingCard to an empty DestCard has to be a 5. If the deck is consist of
@@ -802,7 +785,7 @@ public class BasicKlondike implements KlondikeModel {
     ensureGameStarted();
 
     // Check if the given pileNum is valid
-    if (pileNum < 0 || pileNum >= numPiles) {
+    if (pileNum < 0 || pileNum > (getNumPiles() - 1)) {
       throw new IllegalArgumentException("Invalid pile number");
     }
 
@@ -843,7 +826,7 @@ public class BasicKlondike implements KlondikeModel {
     ensureGameStarted();
 
     // Check if the given pileNum is valid
-    if (pileNum < 0 || pileNum >= numPiles) {
+    if (pileNum < 0 || pileNum > (getNumPiles() - 1)) {
       throw new IllegalArgumentException("Invalid pile number");
     }
 
@@ -861,13 +844,14 @@ public class BasicKlondike implements KlondikeModel {
 
     // Check if the card is visible using the isCardVisible method
     if (!isCardVisible(pileNum, card)) {
-      // Throw an exception if the card is not visible
-      throw new IllegalArgumentException("Card at specified coordinates is not visible");
+      // Return null if the card is not visible
+      return null;
     }
 
     // If the card is visible, return it
     return selectedPile.get(card);
   }
+
 
   /**
    * Returns the card at the top of the specified foundation pile.
