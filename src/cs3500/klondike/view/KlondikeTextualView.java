@@ -32,7 +32,7 @@ public class KlondikeTextualView implements TextView {
     sb.append("Foundation:");
     for (int i = 0; i < model.getNumFoundations(); i++) {
       try {
-        Card card = model.getCardAt(i, 0);  // Try to get the top card
+        Card card = model.getCardAt(i);  // Try to get the top card
         if (card != null) {
           sb.append(" ").append(card);
         } else {
@@ -40,6 +40,9 @@ public class KlondikeTextualView implements TextView {
         }
       } catch (IllegalArgumentException e) {
         sb.append(" <none>");
+      }
+      if (i < model.getNumFoundations() - 1) {
+        sb.append(",");
       }
     }
     sb.append("\n");
@@ -60,10 +63,17 @@ public class KlondikeTextualView implements TextView {
             sb.append("  ?");
           }
         } else {
-          sb.append("   "); // Three spaces for alignment with the card's representation.
+          if (row == 0 && model.getPileHeight(pileNum) == 0) {
+            sb.append("  X");
+          } else {
+            sb.append("   "); // Three spaces for alignment with the card's representation.
+          }
         }
       }
-      sb.append("\n");
+      // Only append a newline if this isn't the last row
+      if (row < maxPileHeight - 1) {
+        sb.append("\n");
+      }
     }
 
     return sb.toString();
